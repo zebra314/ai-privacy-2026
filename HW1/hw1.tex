@@ -1,0 +1,479 @@
+\documentclass[11pt]{article}
+
+% ---------------------------------------------------------------
+% Packages
+% ---------------------------------------------------------------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+% ---------------------------------------------------------------
+% Macros
+% ---------------------------------------------------------------
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cN}{\mathcal{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\V}{\mathbb{V}}
+\newcommand{\Lap}{\mathrm{Lap}}
+\newcommand{\FPR}{\mathrm{FPR}}
+\newcommand{\TPR}{\mathrm{TPR}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\user}{\mathrm{user}}
+
+% ---------------------------------------------------------------
+% Answer block
+% ---------------------------------------------------------------
+\newenvironment{answer}{\par\medskip\noindent\textbf{Answer.}\ }{\par\bigskip}
+
+% Problem headings
+\newcommand{\problem}[2]{\section*{#1 \hfill\normalsize(#2)}}
+
+\setlist[enumerate,1]{label=(\alph*), leftmargin=*, itemsep=6pt}
+\setlist[enumerate,2]{label=(\roman*), leftmargin=*, itemsep=4pt}
+
+% ---------------------------------------------------------------
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries AI Privacy: Theory and Practice}\\[6pt]
+  {\Large Homework 1: Introduction to Differential Privacy (Lecture 1)}\\[8pt]
+  Instructor: Eli Chien\\
+  Department of Electrical Engineering, National Taiwan University\\[4pt]
+  Fall 2026 \qquad Due: October 12, 2026
+\end{center}
+
+\vspace{4pt}
+\noindent\text{Name:} Ying Pei Lin \\
+\text{Student ID:} R15942158
+
+% ===============================================================
+\problem{Problem 1: Properties of the DP definition}{25 points}
+% ===============================================================
+
+This problem fills in three gaps that the lecture left as exercises, and then
+makes the hypothesis-testing interpretation of DP quantitative.
+
+\begin{enumerate}
+
+\item (4 pts) \textbf{One-sided suffices.} Remark 2 in the lecture says that,
+since the roles of $D$ and $D'$ are symmetric under both add/remove and
+replacement adjacency, it is enough to require the one-sided bound
+$\Pr(\cA(D)\in S)\le e^{\eps}\Pr(\cA(D')\in S)+\delta$. Explain precisely
+why. Then give an example of a non-symmetric adjacency relation (one where
+$D\simeq D'$ does not imply $D'\simeq D$) and explain what could go wrong if
+one only imposed the one-sided bound for it.
+
+\begin{answer}
+
+For add/remove adjacent, one of datasets
+contains one extra record, so their sizes differ by one. Formally,
+
+\[
+  D \simeq D' \iff D = D' \cup \{x\}
+  \ \text{or}\ D = D' \setminus \{x\}
+  \ \text{for some } x \in \mathcal{X}
+\]
+
+To show that the adjacency relation is symmetric, we exchange the roles of $D$ and $D'$:
+
+\[
+\begin{aligned}
+D' \simeq D
+&\iff D' = D \cup \{x\} \ \text{or}\ D' = D \setminus \{x\}
+  \ \text{for some } x \in \mathcal{X} \\
+&\iff D = D' \setminus \{x\} \ \text{or}\ D = D' \cup \{x\}
+  \ \text{for some } x \in \mathcal{X} \\
+&\iff D \simeq D'
+\end{aligned}
+\]
+
+For replacement adjacency, two datasets have the same size, they differ in exactly one record. Formally,
+
+\[
+  D \simeq D' \iff D = E\cup\{a\},\ D' = E\cup\{b\}
+  \text{ for some } E \text{ and records } a\neq b
+\]
+
+To show that the adjacency relation is symmetric, we exchange the roles of $D$ and $D'$:
+
+\[
+\begin{aligned}
+D' \simeq D
+&\iff D' = E\cup\{a\},\ D = E\cup\{b\}
+  \ \text{for some } E \text{ and records } a\neq b \\
+&\iff D = E\cup\{b\},\ D' = E\cup\{a\}
+  \ \text{for some } E \text{ and records } b\neq a \\
+&\iff D \simeq D'
+\end{aligned}
+\]
+
+Suppose the one-sided bound
+
+\[
+  \Pr(\cA(D)\in S)\le e^{\eps}\Pr(\cA(D')\in S)+\delta
+\]
+
+holds for all adjacent pairs $(D, D')$ and all events $S\subseteq\cS$.
+Both add/remove and replacement adjacency are symmetric. Hence $(D', D)$ is also an adjacent pair, and applying the
+one-sided bound to it gives
+
+\[
+  \Pr(\cA(D')\in S)\le e^{\eps}\Pr(\cA(D)\in S)+\delta .
+\]
+
+Therefore the bound holds in both directions, and requiring only one side
+is enough.
+
+For an example of non-symmetric adjacency, we can simply remove
+
+\[
+  D \simeq D' \iff D = D' \cup \{x\}
+  \ \text{for some } x \in \mathcal{X}.
+\]
+
+\end{answer}
+
+\item (6 pts) \textbf{Post-processing with a randomized map.} The lecture
+proved the post-processing theorem for a deterministic $g:\cS\mapsto\cS'$
+and left the randomized case as homework. Let $\cA$ be $(\eps,\delta)$-DP and
+let $g$ be a randomized map whose randomness is independent of $\cA$ and of
+the data. Prove that $g\circ\cA$ is $(\eps,\delta)$-DP.
+
+\textit{Hint.} Write $g(s)=G(s,R)$ for a deterministic $G$ and an independent
+random seed $R$, condition on $R$, and apply the deterministic result.
+
+\begin{answer}
+
+\end{answer}
+
+\item (7 pts) \textbf{Sequential (adaptive) composition.} The lecture proved
+simple composition, where $\cA_1$ and $\cA_2$ are run independently on $D$,
+and asked what happens in the sequential case where the output of $\cA_1$ is
+fed into $\cA_2$. Formalize this as follows. Let $\cA_1:\cD\mapsto\cS_1$ be
+$\eps_1$-DP, and let $\cA_2:\cD\times\cS_1\mapsto\cS_2$ be such that for every
+fixed $y\in\cS_1$ the map $D\mapsto\cA_2(D,y)$ is $\eps_2$-DP. Define
+$\cA(D)=(Y_1,Y_2)$ with $Y_1=\cA_1(D)$ and $Y_2=\cA_2(D,Y_1)$, where the
+internal randomness of $\cA_1$ and $\cA_2$ is independent. Prove that $\cA$ is
+$(\eps_1+\eps_2)$-DP. You may assume $\cS_1$ and $\cS_2$ are finite (or work
+with densities).
+
+\begin{answer}
+
+\end{answer}
+
+\item (5 pts) \textbf{The privacy region.} Consider the membership inference
+game of Lecture 1 with $H_0$: the mechanism was run on $D$ and $H_1$: it was
+run on the adjacent $D'$. An attacker is any (possibly randomized) test $T$
+that maps the output to $\{0,1\}$; write $\FPR=\Pr(T=1\mid H_0)$ and
+$\TPR=\Pr(T=1\mid H_1)$. Prove that if $\cA$ is $(\eps,\delta)$-DP then every
+attacker satisfies
+\begin{equation}\label{eq:privacy-region}
+  \TPR\le e^{\eps}\,\FPR+\delta
+  \qquad\text{and}\qquad
+  1-\FPR\le e^{\eps}(1-\TPR)+\delta.
+\end{equation}
+\textit{Hint.} For a deterministic test, take $S=\{y:T(y)=1\}$ and its
+complement; then handle randomized tests using part (b).
+
+\begin{answer}
+
+\end{answer}
+
+\item (3 pts) \textbf{Reading the numbers.} A DP-trained model is released
+with $(\eps,\delta)=(8,10^{-5})$, a common setting in practice. Using
+\eqref{eq:privacy-region}, what is the largest $\TPR$ an attacker can have at
+$\FPR=10^{-3}$? Repeat for $\eps=1$. Then explain in one or two sentences why
+an attacker that always outputs 1 (so $\TPR=1$) does not contradict either
+bound.
+
+\begin{answer}
+
+\end{answer}
+
+\end{enumerate}
+
+% ===============================================================
+\problem{Problem 2: Understanding the basic mechanisms}{25 points}
+% ===============================================================
+
+Each part below examines a common misunderstanding about the Laplace,
+Gaussian, or randomized response mechanism.
+
+\begin{enumerate}
+
+\item (6 pts) \textbf{Wrong norm, wrong guarantee.} A student implements the
+Laplace mechanism for $f:\cD\mapsto\R^d$ but calibrates the noise to the
+$\ell_2$ sensitivity: they release $f(D)+Z$ with
+$Z_i\overset{\text{iid}}{\sim}\Lap(0,\Delta_2 f/\eps)$. Show that this
+mechanism is $\sqrt{d}\,\eps$-DP, and give a function $f$ (with its adjacency)
+for which this factor $\sqrt{d}$ cannot be improved, i.e.\ the mechanism is
+not $\eps'$-DP for any $\eps'<\sqrt{d}\,\eps$.
+
+\textit{Hint.} $\|x\|_1\le\sqrt{d}\,\|x\|_2$, with equality when all
+coordinates have the same magnitude.
+
+\begin{answer}
+
+\end{answer}
+
+\item (6 pts) \textbf{The Gaussian mechanism is never pure DP.} Take $d=1$,
+$\Delta_2 f=\Delta>0$, and any $\sigma>0$. Show that the Gaussian mechanism
+$f(D)+\cN(0,\sigma^2)$ is not $(\eps,0)$-DP for any finite $\eps$. Explain in
+words why the Laplace distribution avoids this problem, and why the theorem
+for the Gaussian mechanism therefore must have $\delta>0$ no matter how large
+$\sigma$ is.
+
+\begin{answer}
+
+\end{answer}
+
+\item (6 pts) \textbf{The strongest attacker against randomized response.}
+Let $X\in\{0,1\}$ be one person's bit and $Y=M_{\mathrm{RR}}(X)$ the output of
+randomized response with $p=e^{\eps}/(1+e^{\eps})$. Consider the hypotheses
+$H_0$: $X=0$ and $H_1$: $X=1$.
+\begin{enumerate}
+  \item Compute the likelihood ratio
+  $\Pr(Y=y\mid H_1)/\Pr(Y=y\mid H_0)$ for $y\in\{0,1\}$, and write down the
+  Neyman--Pearson (likelihood ratio) test.
+
+  \begin{answer}
+
+  \end{answer}
+
+  \item Compute the $(\FPR,\TPR)$ of the test ``output 1 if and only if
+  $Y=1$'', and show that it satisfies the first inequality of
+  \eqref{eq:privacy-region} with equality (with $\delta=0$). What does this
+  say about the tightness of the DP bound for randomized response?
+
+  \begin{answer}
+
+  \end{answer}
+\end{enumerate}
+
+\item (7 pts) \textbf{Randomized response versus the Laplace mechanism.} We
+want the fraction $\mu=\frac{1}{n}\sum_{i=1}^n X_i$ of $n$ bits
+$X_i\in\{0,1\}$ with $\eps$-DP. Two options:
+\begin{description}[leftmargin=4.2em, style=nextline]
+  \item[(RR)] Each person applies $M_{\mathrm{RR}}$ to their own bit with
+  parameter $\eps$; the analyst uses the unbiased estimator $\hat\mu$ from
+  the lecture.
+  \item[(Lap)] A trusted curator computes $\mu$ and releases
+  $\mu+\Lap(0,\Delta_1\mu/\eps)$ under replacement adjacency.
+\end{description}
+Compute $\V[\hat\mu]$ exactly (not just the upper bound $\frac14$ on $p(1-p)$
+used in the lecture) and $\V[\mu+Z]$ for (Lap). Show that the ratio of the two
+variances is
+\[
+  \frac{V_{\mathrm{RR}}}{V_{\mathrm{Lap}}}
+  =\frac{n\,\eps^2 e^{\eps}}{2\,(e^{\eps}-1)^2},
+\]
+which tends to $n/2$ as $\eps\to0$. Evaluate it for $n=1000$ and
+$\eps\in\{0.1,1\}$. Then answer: the two options have the same $\eps$, so why
+is (RR) so much noisier? Which of the two protects each person against a
+stronger adversary, and in what sense? (One paragraph; we will return to this
+in the lecture on local DP.)
+
+\begin{answer}
+
+\end{answer}
+
+\end{enumerate}
+
+% ===============================================================
+\problem{Problem 3: Releasing a private feature mean (a DPSGD preview)}{25 points}
+% ===============================================================
+
+A hospital holds records of $n=1000$ patients. Each patient $i$ is described
+by a feature vector $x_i\in\R^d$ with $d=100$, and the hospital wants to
+release the mean $\bar{x}=\frac{1}{n}\sum_{i=1}^n x_i$ to an external research
+group. (This is exactly the shape of a mini-batch gradient in DPSGD, which we
+will study in Lecture 4: replace ``feature vector'' by ``per-example
+gradient''.) Work under replacement adjacency, with $n$ public.
+
+\begin{enumerate}
+
+\item (5 pts) \textbf{Sensitivities.} Assume for now that every feature vector
+satisfies $\|x_i\|_2\le1$. Compute $\Delta_2\bar{x}$. Then show
+$\Delta_1\bar{x}\le\frac{2\sqrt{d}}{n}$ and exhibit a pair of vectors showing
+this is tight.
+
+\begin{answer}
+
+\end{answer}
+
+\item (6 pts) \textbf{Gaussian release.} The hospital targets
+$(\eps,\delta)=(0.5,10^{-5})$. Using the Gaussian mechanism theorem from the
+lecture, compute the required $\sigma$, the expected squared error
+$\E\|Z\|_2^2$, and the root-mean-square error. Compare the latter to the
+maximum possible size of the signal $\|\bar{x}\|_2$ and comment on whether the
+release is useful. Why can you not use the same theorem to compute $\sigma$
+for $\eps=2$, and what would you use instead?
+
+\begin{answer}
+
+\end{answer}
+
+\item (5 pts) \textbf{Laplace release.} Repeat with the Laplace mechanism at
+$\eps=0.5$ (pure DP). Show that the ratio of the expected squared errors,
+Laplace over Gaussian, equals $d/\ln(1.25/\delta)$ in general, and evaluate it
+here. In one sentence, state the trade-off the hospital is making when it
+chooses Gaussian over Laplace.
+
+\begin{answer}
+
+\end{answer}
+
+\item (5 pts) \textbf{Clipping.} In reality the features are not bounded. The
+hospital's engineer proposes: ``compute $C=\max_i\|x_i\|_2$ from the data,
+then release the Gaussian mechanism with $\Delta_2=2C/n$.'' Explain why the
+resulting release is not $(\eps,\delta)$-DP. Then describe the standard fix
+(clip every $x_i$ to $\ell_2$ norm at most a fixed $C$ before averaging, that
+is, replace $x_i$ by $x_i\cdot\min(1,C/\|x_i\|_2)$), argue carefully why the
+fix has bounded sensitivity, and describe the price paid in utility. Is the
+clipped-then-noised mean an unbiased estimate of $\bar{x}$?
+
+\begin{answer}
+
+\end{answer}
+
+\item (4 pts) \textbf{Repeated releases.} The hospital now wants to release an
+updated mean every day for $T=100$ days from the same patient records (the
+patients' features change from day to day, but the same $n$ people are in
+every release). Using simple composition, what per-day budget $\eps_t$
+achieves a total of $\eps=0.5$, and by what factor does $\sigma$ grow compared
+to part (b)? What is the RMS error now? In one or two sentences, explain why
+this calculation makes iterative algorithms such as DPSGD look hopeless, and
+why the situation is not actually that bad (name the tools from later
+lectures that improve on simple composition; you need not explain how they
+work).
+
+\begin{answer}
+
+\end{answer}
+
+\end{enumerate}
+
+% ===============================================================
+\problem{Problem 4: Record-level versus user-level DP on a social platform}{25 points}
+% ===============================================================
+
+A social platform has $N=10^6$ users. Each user $u$ has written some number
+$k_u\ge0$ of posts over the past year. The platform's analyst wants to publish
+statistics about posting activity with a DP guarantee. Two adjacency relations
+are on the table:
+\begin{itemize}
+  \item \textbf{Record-level add/remove:} $D\simeq D'$ if $D'$ is obtained
+  from $D$ by adding or removing one post.
+  \item \textbf{User-level add/remove:} $D\simeq D'$ if $D'$ is obtained from
+  $D$ by adding or removing one user together with all of their posts.
+\end{itemize}
+
+\begin{enumerate}
+
+\item (5 pts) \textbf{Total number of posts.} Let $f(D)=\sum_u k_u$ be the
+total number of posts. Compute $\Delta_1 f$ under record-level adjacency. Show
+that under user-level adjacency $\Delta_1 f$ is unbounded. Then define the
+contribution-bounded query $f_m(D)=\sum_u\min(k_u,m)$ and compute its
+user-level sensitivity. What does $f_m$ measure when many users have
+$k_u>m$?
+
+\begin{answer}
+
+\end{answer}
+
+\item (6 pts) \textbf{Two routes to user-level pure DP.} The analyst wants
+user-level $\eps_{\user}=5$ for every user, and knows that most users have at
+most $m=50$ posts.
+\begin{description}[leftmargin=5.5em, style=nextline]
+  \item[Route A (convert)] Release $f(D)+\Lap(0,1/\eps_0)$ with record-level
+  $\eps_0$, then invoke group privacy.
+  \item[Route B (design)] Release $f_{50}(D)+\Lap(0,\Delta_1 f_{50}/\eps_{\user})$
+  directly under user-level adjacency.
+\end{description}
+For Route A, what $\eps_0$ is needed so that a user with exactly 50 posts gets
+$\eps_{\user}=5$? Compute the Laplace scale parameter under both routes and
+show they are equal. Then explain why Route B still gives the strictly better
+guarantee: what does Route A promise to a user with 200 posts, and what does
+Route B promise to the same user?
+
+\begin{answer}
+
+\end{answer}
+
+\item (6 pts) \textbf{The two routes under approximate DP.} Now the analyst
+uses the Gaussian mechanism instead, with a record-level
+$(\eps_0,\delta_0)=(0.1,10^{-8})$ in Route A, and user-level
+$(\eps,\delta)=(5,10^{-8})$ on $f_{50}$ in Route B.
+\begin{enumerate}
+  \item Using the group-privacy theorem for approximate DP from the lecture,
+  compute the user-level $(\eps_{\user},\delta_{\user})$ that Route A gives to
+  a user with 50 posts.
+
+  \begin{answer}
+
+  \end{answer}
+
+  \item Calibrate both routes with the noise formula
+  $\sigma=\frac{\Delta_2 f}{\eps}\sqrt{2\ln(1.25/\delta)}$ at
+  $\delta=10^{-8}$ (Route A: $\Delta_2 f=1$, $\eps=\eps_0$; Route B:
+  $\Delta_2 f_{50}=50$, $\eps=5$). Show that the two values of $\sigma$
+  coincide, so that for a user with exactly 50 posts the two routes release
+  the same random variable. Route B certifies this mechanism as user-level
+  $(5,10^{-8})$-DP for that user (the classical theorem does not apply at
+  $\eps=5$, but you may take for granted, or verify numerically, that this
+  $\sigma$ satisfies the analytic Gaussian mechanism condition at
+  $(5,10^{-8})$). Explain why Route A's generic group-privacy conversion in
+  (i) certifies a much worse $\delta$ for the very same mechanism, and state
+  the lesson. Finally compare the $\delta_{\user}$ of (i) with the rule of
+  thumb $\delta\le1/N$ from the lecture.
+
+  \begin{answer}
+
+  \end{answer}
+\end{enumerate}
+
+\item (5 pts) \textbf{A time series.} The analyst now wants to release the
+vector $h\in\Z_{\ge0}^{365}$ of daily post counts, one coordinate per day of
+the year, with pure $\eps$-DP.
+\begin{enumerate}
+  \item Under record-level adjacency, compute $\Delta_1 h$ and state the
+  Laplace noise needed per coordinate. Compare with the naive plan ``treat the
+  365 daily counts as 365 separate queries and split $\eps$ by simple
+  composition'': by what factor is the naive noise larger, and why is the
+  split unnecessary?
+
+  \begin{answer}
+
+  \end{answer}
+
+  \item Under user-level adjacency, compute $\Delta_1 h$ for two ways of
+  bounding contributions: (1) cap each user at $m$ posts in total for the
+  year; (2) cap each user at $c$ posts per day. Which cap would you choose if
+  most users write at most 3 posts per day but a few write 100, and why?
+  Comment on what happens to the data of the heavy users under your choice.
+
+  \begin{answer}
+
+  \end{answer}
+\end{enumerate}
+
+\item (3 pts) \textbf{Writing the privacy statement.} The analyst's report
+says only: ``All statistics are released with $\eps=1$.'' List what is
+missing from this statement for a reader to know what is protected, and
+explain why $\eps=1$ under record-level adjacency and $\eps=1$ under
+user-level adjacency are not comparable promises, using your answer to
+part (b).
+
+\begin{answer}
+
+\end{answer}
+
+\end{enumerate}
+
+\end{document}
