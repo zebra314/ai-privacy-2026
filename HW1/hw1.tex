@@ -71,8 +71,9 @@ one only imposed the one-sided bound for it.
 
 \begin{answer}
 
-For add/remove adjacent, one of datasets
-contains one extra record, so their sizes differ by one. Formally,
+\textbf{Why one side suffices.}
+
+Under add/remove adjacency, one datasets contains one extra record:
 
 \[
   D \simeq D' \iff D = D' \cup \{x\}
@@ -80,7 +81,7 @@ contains one extra record, so their sizes differ by one. Formally,
   \ \text{for some } x \in \mathcal{X}
 \]
 
-To show that the adjacency relation is symmetric, we exchange the roles of $D$ and $D'$:
+Exchanging the roles of $D$ and $D'$:
 
 \[
 \begin{aligned}
@@ -93,14 +94,14 @@ D' \simeq D
 \end{aligned}
 \]
 
-For replacement adjacency, two datasets have the same size, they differ in exactly one record. Formally,
+Under replacement adjacency, the datasets have the same size and differ in one record:
 
 \[
   D \simeq D' \iff D = E\cup\{a\},\ D' = E\cup\{b\}
   \text{ for some } E \text{ and records } a\neq b
 \]
 
-To show that the adjacency relation is symmetric, we exchange the roles of $D$ and $D'$:
+Similarly,
 
 \[
 \begin{aligned}
@@ -119,9 +120,9 @@ Suppose the one-sided bound
   \Pr(\cA(D)\in S)\le e^{\eps}\Pr(\cA(D')\in S)+\delta
 \]
 
-holds for all adjacent pairs $(D, D')$ and all events $S\subseteq\cS$.
-Both add/remove and replacement adjacency are symmetric. Hence $(D', D)$ is also an adjacent pair, and applying the
-one-sided bound to it gives
+holds for all adjacent pairs $(D, D')$.
+Since both adjacency relations are symmetric, $(D', D)$ is also adjacent.
+Applying the same bound to $(D', D)$ gives
 
 \[
   \Pr(\cA(D')\in S)\le e^{\eps}\Pr(\cA(D)\in S)+\delta .
@@ -130,12 +131,57 @@ one-sided bound to it gives
 Therefore the bound holds in both directions, and requiring only one side
 is enough.
 
-For an example of non-symmetric adjacency, we can simply remove
+\textbf{A non-symmetric relation.}
+
+Consider add-only adjacency:
 
 \[
-  D \simeq D' \iff D = D' \cup \{x\}
-  \ \text{for some } x \in \mathcal{X}.
+ D \simeq D' \iff D = D' \cup \{x\} \ \text{for some } x \in \mathcal{X}.
 \]
+
+Here $D$ is always the larger dataset, so the reverse direction is never checked.
+For example, fix a record $z$, let $\eps=\ln 2$ and $\delta=0$, and define
+
+If $z\in D$, then
+\[
+\Pr(\cA(D)=0)=1,
+\qquad
+\Pr(\cA(D)=1)=0.
+\]
+
+If $z\notin D$, then
+\[
+\Pr(\cA(D)=0)=\frac{1}{2},
+\qquad
+\Pr(\cA(D)=1)=\frac{1}{2}.
+\]
+
+If $x=z$, then $z\in D$ and $z\notin D'$. Since $e^\eps=2$,
+
+\[
+\Pr(\cA(D)=0)
+=1
+=2\cdot\frac{1}{2}
+=e^\eps\Pr(\cA(D')=0),
+\qquad
+\Pr(\cA(D)=1)=0.
+\]
+
+Thus, the one-sided bound holds. However, in the reverse direction, for
+$S=\{1\}$,
+
+\[
+\Pr(\cA(D')=1)
+=\frac{1}{2}
+>
+0
+=e^\eps\Pr(\cA(D)=1).
+\]
+
+Therefore, the reverse bound fails. Moreover, observing output $1$ reveals
+with certainty that $z$ is not in the dataset. Hence, for a non-symmetric
+adjacency relation, imposing only the one-sided bound may fail to protect
+information in the reverse direction.
 
 \end{answer}
 
