@@ -9,6 +9,8 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 
+\DeclareMathOperator{\Var}{Var}
+
 % ---------------------------------------------------------------
 % Macros
 % ---------------------------------------------------------------
@@ -136,52 +138,81 @@ is enough.
 Consider add-only adjacency:
 
 \[
- D \simeq D' \iff D = D' \cup \{x\} \ \text{for some } x \in \mathcal{X}.
+D \simeq D' \iff D = D' \cup \{x\}
+\quad \text{for some } x \in \mathcal{X}.
 \]
 
-Here $D$ is always the larger dataset, so the reverse direction is never checked.
-For example, fix a record $z$, let $\eps=\ln 2$ and $\delta=0$, and define
+Here $D$ is always the larger dataset. The one-sided bound
 
-If $z\in D$, then
 \[
-\Pr(\cA(D)=0)=1,
-\qquad
-\Pr(\cA(D)=1)=0.
+\Pr(\cA(D)\in S)
+\le e^\eps \Pr(\cA(D')\in S)+\delta
 \]
 
-If $z\notin D$, then
+only limits how much the probability of an output can
+increase when a record is added. It does not impose
+a lower bound on that probability, so the probability
+may even decrease to zero.
+
+For example, fix a record $z$, let $\eps=\ln 2$
+and $\delta=0$, and define
+
 \[
-\Pr(\cA(D)=0)=\frac{1}{2},
-\qquad
-\Pr(\cA(D)=1)=\frac{1}{2}.
+\Pr(\cA(D)=0)=
+\begin{cases}
+1, & z\in D,\\
+\frac12, & z\notin D,
+\end{cases}
 \]
 
-If $x=z$, then $z\in D$ and $z\notin D'$. Since $e^\eps=2$,
+\[
+\Pr(\cA(D)=1)=
+\begin{cases}
+0, & z\in D,\\
+\frac12, & z\notin D.
+\end{cases}
+\]
+
+If the added record is $x=z$, then $z\in D$
+and $z\notin D'$. Since $e^\eps=2$,
 
 \[
 \Pr(\cA(D)=0)
 =1
-=2\cdot\frac{1}{2}
+=2\cdot\frac12
 =e^\eps\Pr(\cA(D')=0),
-\qquad
-\Pr(\cA(D)=1)=0.
 \]
 
-Thus, the one-sided bound holds. However, in the reverse direction, for
-$S=\{1\}$,
+and
+
+\[
+\Pr(\cA(D)=1)=0
+\le e^\eps\Pr(\cA(D')=1).
+\]
+
+If $x\neq z$, both datasets have the same
+output distribution, so the bound also holds.
+
+However, for $S=\{1\}$, the probability decreases
+from $\frac12$ to $0$ when $z$ is added.
+Although this satisfies the one-sided bound,
+the reverse inequality fails:
 
 \[
 \Pr(\cA(D')=1)
-=\frac{1}{2}
->
-0
+=\frac12
+>0
 =e^\eps\Pr(\cA(D)=1).
 \]
 
-Therefore, the reverse bound fails. Moreover, observing output $1$ reveals
-with certainty that $z$ is not in the dataset. Hence, for a non-symmetric
-adjacency relation, imposing only the one-sided bound may fail to protect
-information in the reverse direction.
+Consequently, observing output $1$ reveals
+with certainty that $z$ is absent from the dataset.
+
+This shows that a one-sided bound does not prevent
+an output from becoming impossible after adding
+a record. Without the reverse bound, such changes
+can reveal information about whether a record
+is present.
 
 \end{answer}
 
@@ -195,6 +226,43 @@ the data. Prove that $g\circ\cA$ is $(\eps,\delta)$-DP.
 random seed $R$, condition on $R$, and apply the deterministic result.
 
 \begin{answer}
+
+Since $g$ is randomized, we can write
+$g(s)=G(s,R)$, where $G$ is deterministic
+and $R$ is a random seed independent of
+$\cA$ and the data.
+
+For any fixed $R=r$, define
+$g_r(s)=G(s,r)$.
+Since $g_r$ is deterministic and $\cA$
+is $(\eps,\delta)$-DP, the deterministic
+post-processing theorem gives, for any
+adjacent datasets $D,D'$ and measurable
+set $S'\subseteq\cS'$,
+
+\[
+\Pr(g_r(\cA(D))\in S')
+\le
+e^\eps\Pr(g_r(\cA(D'))\in S')+\delta.
+\]
+
+Taking the expectation over $R$, we obtain
+
+\[
+\begin{aligned}
+&\Pr(g(\cA(D))\in S')\\
+&=\mathbb{E}_R\left[
+\Pr(G(\cA(D),R)\in S'\mid R)
+\right]\\
+&\le e^\eps\mathbb{E}_R\left[
+\Pr(G(\cA(D'),R)\in S'\mid R)
+\right]+\delta\\
+&=e^\eps\Pr(g(\cA(D'))\in S')+\delta.
+\end{aligned}
+\]
+
+Therefore, $g\circ\cA$ is
+$(\eps,\delta)$-DP.
 
 \end{answer}
 
@@ -210,6 +278,69 @@ $(\eps_1+\eps_2)$-DP. You may assume $\cS_1$ and $\cS_2$ are finite (or work
 with densities).
 
 \begin{answer}
+
+Let $D,D'$ be any adjacent datasets.
+For any $y\in\cS_1$ and $z\in\cS_2$,
+by conditional probability,
+
+\[
+\begin{aligned}
+&\Pr(\cA(D)=(y,z))\\
+&=\Pr(Y_1=y)\Pr(Y_2=z\mid Y_1=y)\\
+&=\Pr(\cA_1(D)=y)
+  \Pr(\cA_2(D,y)=z).
+\end{aligned}
+\]
+
+The last equality holds because the internal
+randomness of $\cA_1$ and $\cA_2$ is independent.
+
+Since $\cA_1$ is $\eps_1$-DP,
+
+\[
+\Pr(\cA_1(D)=y)
+\le e^{\eps_1}\Pr(\cA_1(D')=y).
+\]
+
+For every fixed $y$, $\cA_2(\cdot,y)$
+is $\eps_2$-DP, so
+
+\[
+\Pr(\cA_2(D,y)=z)
+\le e^{\eps_2}\Pr(\cA_2(D',y)=z).
+\]
+
+Combining these inequalities,
+
+\[
+\begin{aligned}
+&\Pr(\cA(D)=(y,z))\\
+&\le e^{\eps_1+\eps_2}
+  \Pr(\cA_1(D')=y)
+  \Pr(\cA_2(D',y)=z)\\
+&=e^{\eps_1+\eps_2}
+  \Pr(\cA(D')=(y,z)).
+\end{aligned}
+\]
+
+For any subset $S\subseteq\cS_1\times\cS_2$,
+summing over all $(y,z)\in S$ gives
+
+\[
+\begin{aligned}
+\Pr(\cA(D)\in S)
+&=\sum_{(y,z)\in S}
+  \Pr(\cA(D)=(y,z))\\
+&\le e^{\eps_1+\eps_2}
+  \sum_{(y,z)\in S}
+  \Pr(\cA(D')=(y,z))\\
+&=e^{\eps_1+\eps_2}
+  \Pr(\cA(D')\in S).
+\end{aligned}
+\]
+
+Therefore, $\cA$ is
+$(\eps_1+\eps_2)$-DP.
 
 \end{answer}
 
@@ -229,6 +360,69 @@ complement; then handle randomized tests using part (b).
 
 \begin{answer}
 
+First, consider a deterministic test $T$.
+Let $S=\{y:T(y)=1\}$. By definition,
+
+\[
+\FPR=\Pr(\cA(D)\in S),
+\qquad
+\TPR=\Pr(\cA(D')\in S).
+\]
+
+Since $\cA$ is $(\eps,\delta)$-DP
+and $D,D'$ are adjacent,
+
+\[
+\Pr(\cA(D')\in S)
+\le e^\eps\Pr(\cA(D)\in S)+\delta.
+\]
+
+Therefore,
+
+\[
+\TPR\le e^\eps\FPR+\delta.
+\]
+
+Now consider the complement $S^c$.
+We have
+
+\[
+1-\FPR=\Pr(\cA(D)\in S^c),
+\qquad
+1-\TPR=\Pr(\cA(D')\in S^c).
+\]
+
+Applying the DP guarantee in the other direction,
+
+\[
+\Pr(\cA(D)\in S^c)
+\le e^\eps\Pr(\cA(D')\in S^c)+\delta.
+\]
+
+Thus,
+
+\[
+1-\FPR\le e^\eps(1-\TPR)+\delta.
+\]
+
+For a randomized test $T$, by the randomized
+post-processing theorem from part (b),
+$T\circ\cA$ is also $(\eps,\delta)$-DP.
+Applying the same inequalities to the
+output events $\{1\}$ and $\{0\}$
+gives the two bounds.
+
+Hence, every deterministic or randomized
+attacker satisfies
+
+\[
+\boxed{
+\TPR\le e^\eps\FPR+\delta,
+\qquad
+1-\FPR\le e^\eps(1-\TPR)+\delta.
+}
+\]
+
 \end{answer}
 
 \item (3 pts) \textbf{Reading the numbers.} A DP-trained model is released
@@ -239,6 +433,46 @@ an attacker that always outputs 1 (so $\TPR=1$) does not contradict either
 bound.
 
 \begin{answer}
+
+From the privacy region,
+
+\[
+\TPR \le e^\eps \FPR+\delta,
+\qquad
+\TPR \le 1-e^{-\eps}(1-\FPR-\delta).
+\]
+
+For $\FPR=10^{-3}$ and $\delta=10^{-5}$:
+
+When $\eps=8$,
+
+\[
+\TPR \le
+\min\left\{
+1,\,
+e^8(10^{-3})+10^{-5},\,
+1-e^{-8}(1-10^{-3}-10^{-5})
+\right\}
+\approx 0.999665.
+\]
+
+When $\eps=1$,
+
+\[
+\TPR \le
+\min\left\{
+1,\,
+e(10^{-3})+10^{-5},\,
+1-e^{-1}(1-10^{-3}-10^{-5})
+\right\}
+\approx 0.002728.
+\]
+
+An attacker that always outputs $1$ has
+$\TPR=1$ but also $\FPR=1$, rather than
+$10^{-3}$. Therefore, it satisfies both
+privacy bounds and does not contradict
+either result.
 
 \end{answer}
 
@@ -266,6 +500,95 @@ coordinates have the same magnitude.
 
 \begin{answer}
 
+Let $b=\Delta_2 f/\eps$. Since the noise
+coordinates are independent Laplace random
+variables, the output density is
+
+\[
+p_D(y)=\frac{1}{(2b)^d}
+\exp\left(-\frac{\|y-f(D)\|_1}{b}\right).
+\]
+
+For any adjacent datasets $D,D'$, the
+density ratio satisfies
+
+\[
+\begin{aligned}
+\frac{p_D(y)}{p_{D'}(y)}
+&=\exp\left(
+\frac{\|y-f(D')\|_1-\|y-f(D)\|_1}{b}
+\right)\\
+&\le \exp\left(
+\frac{\|f(D)-f(D')\|_1}{b}
+\right)\\
+&\le \exp\left(
+\frac{\sqrt d\,\|f(D)-f(D')\|_2}{b}
+\right)\\
+&\le \exp\left(
+\frac{\sqrt d\,\Delta_2 f}{\Delta_2 f/\eps}
+\right)\\
+&=e^{\sqrt d\,\eps}.
+\end{aligned}
+\]
+
+Thus, the mechanism is $\sqrt d\,\eps$-DP.
+
+To show that this bound is tight, consider
+datasets $D\in\{0,1\}$, with $0$ and $1$
+adjacent, and define
+
+\[
+f(D)=\frac{D}{\sqrt d}(1,\ldots,1).
+\]
+
+Then
+
+\[
+\Delta_2 f=\|f(1)-f(0)\|_2=1,
+\]
+
+while
+
+\[
+\|f(1)-f(0)\|_1=\sqrt d.
+\]
+
+The Laplace scale is therefore $b=1/\eps$.
+
+Consider the event $S=(-\infty,0]^d$.
+By independence of the noise coordinates,
+
+\[
+\Pr(\cA(0)\in S)=\left(\frac12\right)^d,
+\]
+
+and
+
+\[
+\Pr(\cA(1)\in S)
+=\left(\frac12 e^{-\eps/\sqrt d}\right)^d.
+\]
+
+Hence,
+
+\[
+\frac{\Pr(\cA(0)\in S)}
+{\Pr(\cA(1)\in S)}
+=e^{\sqrt d\,\eps}.
+\]
+
+Therefore, for any $\eps'<\sqrt d\,\eps$,
+
+\[
+\Pr(\cA(0)\in S)
+>e^{\eps'}\Pr(\cA(1)\in S),
+\]
+
+which violates $\eps'$-DP.
+
+Thus, the factor $\sqrt d$ is tight and
+cannot be improved in general.
+
 \end{answer}
 
 \item (6 pts) \textbf{The Gaussian mechanism is never pure DP.} Take $d=1$,
@@ -277,6 +600,82 @@ $\sigma$ is.
 
 \begin{answer}
 
+Since $\Delta_2 f=\Delta>0$, there exist
+adjacent datasets $D,D'$ such that
+$f(D)\neq f(D')$.
+Without loss of generality, let
+$f(D)=0$ and $f(D')=a>0$.
+
+The Gaussian mechanism has output densities
+
+\[
+p_D(y)=\frac{1}{\sqrt{2\pi}\sigma}
+\exp\left(-\frac{y^2}{2\sigma^2}\right),
+\]
+
+\[
+p_{D'}(y)=\frac{1}{\sqrt{2\pi}\sigma}
+\exp\left(-\frac{(y-a)^2}{2\sigma^2}\right).
+\]
+
+Their density ratio is
+
+\[
+\begin{aligned}
+\frac{p_D(y)}{p_{D'}(y)}
+&=\exp\left(
+\frac{(y-a)^2-y^2}{2\sigma^2}
+\right)\\
+&=\exp\left(
+\frac{a^2-2ay}{2\sigma^2}
+\right).
+\end{aligned}
+\]
+
+As $y\to-\infty$, this ratio tends to
+infinity for any finite $\sigma>0$.
+
+Thus, for any finite $\eps$, we can choose
+$t<a/2-\sigma^2\eps/a$ such that
+
+\[
+p_D(y)>e^\eps p_{D'}(y)
+\qquad \text{for all } y\le t.
+\]
+
+Taking $S=(-\infty,t]$ and integrating,
+
+\[
+\Pr(\cA(D)\in S)
+>e^\eps\Pr(\cA(D')\in S).
+\]
+
+This violates the definition of
+$(\eps,0)$-DP. Therefore, the Gaussian
+mechanism is not pure DP for any finite
+$\eps$.
+
+In contrast, the Laplace distribution
+has a bounded density ratio due to the
+triangle inequality:
+
+\[
+\frac{p_D(y)}{p_{D'}(y)}
+\le \exp\left(
+\frac{|f(D)-f(D')|}{b}
+\right).
+\]
+
+Hence, Laplace noise can provide pure DP.
+
+For Gaussian noise, the density ratio
+remains unbounded regardless of how large
+the finite variance is. Increasing $\sigma$
+only makes the violating tail events less
+likely, but never eliminates them.
+Therefore, the Gaussian mechanism requires
+$\delta>0$ for any finite $\eps$.
+
 \end{answer}
 
 \item (6 pts) \textbf{The strongest attacker against randomized response.}
@@ -284,22 +683,103 @@ Let $X\in\{0,1\}$ be one person's bit and $Y=M_{\mathrm{RR}}(X)$ the output of
 randomized response with $p=e^{\eps}/(1+e^{\eps})$. Consider the hypotheses
 $H_0$: $X=0$ and $H_1$: $X=1$.
 \begin{enumerate}
-  \item Compute the likelihood ratio
-  $\Pr(Y=y\mid H_1)/\Pr(Y=y\mid H_0)$ for $y\in\{0,1\}$, and write down the
-  Neyman--Pearson (likelihood ratio) test.
 
-  \begin{answer}
+\item Compute the likelihood ratio
+$\Pr(Y=y\mid H_1)/\Pr(Y=y\mid H_0)$ for $y\in\{0,1\}$, and write down the
+Neyman--Pearson (likelihood ratio) test.
 
-  \end{answer}
+\begin{answer}
 
-  \item Compute the $(\FPR,\TPR)$ of the test ``output 1 if and only if
-  $Y=1$'', and show that it satisfies the first inequality of
-  \eqref{eq:privacy-region} with equality (with $\delta=0$). What does this
-  say about the tightness of the DP bound for randomized response?
+The likelihood ratio is
 
-  \begin{answer}
+\[
+\Lambda(y)=
+\frac{\Pr(Y=y\mid H_1)}
+{\Pr(Y=y\mid H_0)}.
+\]
 
-  \end{answer}
+For $y=1$,
+
+\[
+\Lambda(1)=\frac{p}{1-p}=e^\eps.
+\]
+
+For $y=0$,
+
+\[
+\Lambda(0)=\frac{1-p}{p}=e^{-\eps}.
+\]
+
+Since $e^\eps>1>e^{-\eps}$ for $\eps>0$,
+the Neyman--Pearson test rejects $H_0$
+when the likelihood ratio exceeds a
+threshold $\tau$.
+
+For $e^{-\eps}<\tau<e^\eps$, the test is
+
+\[
+T(Y)=
+\begin{cases}
+1, & Y=1,\\
+0, & Y=0.
+\end{cases}
+\]
+
+Thus, the attacker predicts $H_1$ when
+$Y=1$ and $H_0$ when $Y=0$.
+
+\end{answer}
+
+\item Compute the $(\FPR,\TPR)$ of the test ``output 1 if and only if
+$Y=1$'', and show that it satisfies the first inequality of
+\eqref{eq:privacy-region} with equality (with $\delta=0$). What does this
+say about the tightness of the DP bound for randomized response?
+
+\begin{answer}
+
+For the test that outputs $1$ if and only if
+$Y=1$, the false positive rate is
+
+\[
+\FPR
+=\Pr(Y=1\mid H_0)
+=1-p
+=\frac{1}{1+e^\eps}.
+\]
+
+The true positive rate is
+
+\[
+\TPR
+=\Pr(Y=1\mid H_1)
+=p
+=\frac{e^\eps}{1+e^\eps}.
+\]
+
+Therefore,
+
+\[
+e^\eps\FPR
+=e^\eps\frac{1}{1+e^\eps}
+=\frac{e^\eps}{1+e^\eps}
+=\TPR.
+\]
+
+Thus,
+
+\[
+\boxed{\TPR=e^\eps\FPR}.
+\]
+
+The first privacy-region inequality holds
+with equality when $\delta=0$.
+This shows that the DP bound is tight for
+randomized response: an attacker can achieve
+the maximum TPR allowed by the bound at
+this FPR, so the bound cannot be improved
+in general.
+
+\end{answer}
 \end{enumerate}
 
 \item (7 pts) \textbf{Randomized response versus the Laplace mechanism.} We
@@ -326,6 +806,81 @@ stronger adversary, and in what sense? (One paragraph; we will return to this
 in the lecture on local DP.)
 
 \begin{answer}
+
+For randomized response, let
+$p=e^\eps/(1+e^\eps)$ and
+$Y_i=M_{\mathrm{RR}}(X_i)$.
+The unbiased estimator is
+
+\[
+\hat\mu=\frac{\bar Y-(1-p)}{2p-1},
+\qquad
+\bar Y=\frac1n\sum_{i=1}^nY_i.
+\]
+
+Since $\Var(Y_i)=p(1-p)$ for either
+value of $X_i$, and the responses are
+independent,
+
+\[
+\begin{aligned}
+V_{\mathrm{RR}}
+&=\Var(\hat\mu)\\
+&=\frac{p(1-p)}{n(2p-1)^2}\\
+&=\frac{e^\eps}{n(e^\eps-1)^2}.
+\end{aligned}
+\]
+
+For the Laplace mechanism, the sensitivity
+of the mean under replacement adjacency is
+$\Delta_1\mu=1/n$. Hence,
+
+\[
+V_{\mathrm{Lap}}
+=\Var(Z)
+=2\left(\frac{1}{n\eps}\right)^2
+=\frac{2}{n^2\eps^2}.
+\]
+
+Therefore,
+
+\[
+\frac{V_{\mathrm{RR}}}{V_{\mathrm{Lap}}}
+=\frac{n\eps^2e^\eps}
+{2(e^\eps-1)^2}.
+\]
+
+Since $e^\eps-1\sim\eps$ as $\eps\to0$,
+
+\[
+\lim_{\eps\to0}
+\frac{V_{\mathrm{RR}}}{V_{\mathrm{Lap}}}
+=\frac n2.
+\]
+
+For $n=1000$, the variance ratios are
+
+\[
+\begin{aligned}
+\eps=0.1 &: \quad 499.58,\\
+\eps=1 &: \quad 460.34.
+\end{aligned}
+\]
+
+Although both mechanisms use the same
+$\eps$, RR is much noisier because each
+person randomizes their own bit, whereas
+the Laplace mechanism adds noise only
+to the aggregate mean, whose sensitivity
+is $1/n$. However, RR provides local DP:
+each person's data is protected before
+it reaches the analyst, even if the analyst
+is untrusted. In contrast, the Laplace
+mechanism provides central DP and requires
+a trusted curator with access to the raw
+data. Thus, RR protects against a stronger
+adversary with access to individual reports,
+at the cost of higher estimation variance.
 
 \end{answer}
 
