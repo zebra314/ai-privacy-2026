@@ -906,6 +906,82 @@ this is tight.
 
 \begin{answer}
 
+Under replacement adjacency, two adjacent datasets
+$D,D'$ differ in exactly one feature vector,
+say $x_i$ and $x_i'$.
+
+Thus,
+
+\[
+\bar{x}(D)-\bar{x}(D')
+=\frac{x_i-x_i'}{n}.
+\]
+
+Since $\|x_i\|_2,\|x_i'\|_2\le1$,
+by the triangle inequality,
+
+\[
+\begin{aligned}
+\|\bar{x}(D)-\bar{x}(D')\|_2
+&=\frac{1}{n}\|x_i-x_i'\|_2\\
+&\le\frac{1}{n}
+(\|x_i\|_2+\|x_i'\|_2)\\
+&\le\frac{2}{n}.
+\end{aligned}
+\]
+
+This bound is tight by choosing
+$x_i=u$ and $x_i'=-u$ for any
+$\|u\|_2=1$. Therefore,
+
+\[
+\boxed{\Delta_2\bar{x}=\frac{2}{n}=0.002}.
+\]
+
+For the $\ell_1$ sensitivity, using
+$\|v\|_1\le\sqrt{d}\|v\|_2$,
+
+\[
+\begin{aligned}
+\|\bar{x}(D)-\bar{x}(D')\|_1
+&=\frac{1}{n}\|x_i-x_i'\|_1\\
+&\le\frac{\sqrt d}{n}\|x_i-x_i'\|_2\\
+&\le\frac{2\sqrt d}{n}.
+\end{aligned}
+\]
+
+To show tightness, choose
+
+\[
+x_i=\frac{1}{\sqrt d}(1,\ldots,1),
+\qquad
+x_i'=-\frac{1}{\sqrt d}(1,\ldots,1).
+\]
+
+Both satisfy $\|x_i\|_2=\|x_i'\|_2=1$,
+and
+
+\[
+\begin{aligned}
+\|\bar{x}(D)-\bar{x}(D')\|_1
+&=\frac{1}{n}\|x_i-x_i'\|_1\\
+&=\frac{1}{n}\cdot
+d\frac{2}{\sqrt d}\\
+&=\frac{2\sqrt d}{n}.
+\end{aligned}
+\]
+
+Hence the bound is tight, and
+
+\[
+\boxed{
+\Delta_1\bar{x}
+=\frac{2\sqrt d}{n}
+=\frac{2\sqrt{100}}{1000}
+=0.02.
+}
+\]
+
 \end{answer}
 
 \item (6 pts) \textbf{Gaussian release.} The hospital targets
@@ -918,6 +994,64 @@ for $\eps=2$, and what would you use instead?
 
 \begin{answer}
 
+From the previous part, the $\ell_2$ sensitivity
+of the mean is $\Delta_2\bar{x}=2/n=0.002$.
+
+Using the Gaussian mechanism theorem,
+for $\eps=0.5$ and $\delta=10^{-5}$,
+we choose
+
+\[
+\begin{aligned}
+\sigma
+&=\frac{\Delta_2\bar{x}}{\eps}
+\sqrt{2\ln\left(\frac{1.25}{\delta}\right)}\\
+&=\frac{0.002}{0.5}
+\sqrt{2\ln\left(\frac{1.25}{10^{-5}}\right)}\\
+&\approx 0.01938.
+\end{aligned}
+\]
+
+Since $Z\sim\mathcal{N}(0,\sigma^2 I_d)$,
+the expected squared error is
+
+\[
+\mathbb{E}\|Z\|_2^2
+=d\sigma^2
+=100(0.01938)^2
+\approx 0.03756.
+\]
+
+The root-mean-square error is
+
+\[
+\mathrm{RMSE}
+=\sqrt{\mathbb{E}\|Z\|_2^2}
+=\sqrt{d}\,\sigma
+\approx 0.19379.
+\]
+
+By the triangle inequality,
+
+\[
+\|\bar{x}\|_2
+\leq\frac{1}{n}\sum_{i=1}^n\|x_i\|_2
+\leq 1.
+\]
+
+Thus, the RMSE is about $19.4\%$ of the
+maximum possible signal magnitude.
+If the actual mean is much smaller than $1$,
+the noise may dominate the signal, making
+the release less useful.
+
+The Gaussian mechanism theorem used above
+requires $0<\eps<1$, so it cannot be directly
+applied when $\eps=2$.
+Instead, we could use the analytic Gaussian
+mechanism, which provides a valid noise
+calibration for larger values of $\eps$.
+
 \end{answer}
 
 \item (5 pts) \textbf{Laplace release.} Repeat with the Laplace mechanism at
@@ -927,6 +1061,74 @@ here. In one sentence, state the trade-off the hospital is making when it
 chooses Gaussian over Laplace.
 
 \begin{answer}
+
+The Laplace mechanism uses the $\ell_1$
+sensitivity $\Delta_1\bar{x}=2\sqrt{d}/n$.
+For $\eps=0.5$, the noise scale is
+
+\[
+b=\frac{\Delta_1\bar{x}}{\eps}
+=\frac{0.02}{0.5}=0.04.
+\]
+
+Since each coordinate has variance $2b^2$,
+the expected squared error is
+
+\[
+\begin{aligned}
+E_{\mathrm{Lap}}
+&=\mathbb{E}\|Z\|_2^2\\
+&=2db^2\\
+&=\frac{8d^2}{n^2\eps^2}\\
+&=0.32.
+\end{aligned}
+\]
+
+The root-mean-square error is
+
+\[
+\mathrm{RMSE}_{\mathrm{Lap}}
+=\sqrt{0.32}\approx0.5657.
+\]
+
+For the Gaussian mechanism, using
+$\Delta_2\bar{x}=2/n$,
+
+\[
+\begin{aligned}
+E_{\mathrm{Gauss}}
+&=d\sigma^2\\
+&=d\frac{2(\Delta_2\bar{x})^2
+\ln(1.25/\delta)}{\eps^2}\\
+&=\frac{8d\ln(1.25/\delta)}
+{n^2\eps^2}.
+\end{aligned}
+\]
+
+Therefore,
+
+\[
+\begin{aligned}
+\frac{E_{\mathrm{Lap}}}{E_{\mathrm{Gauss}}}
+&=\frac{8d^2/(n^2\eps^2)}
+{8d\ln(1.25/\delta)/(n^2\eps^2)}\\
+&=\boxed{\frac{d}{\ln(1.25/\delta)}}.
+\end{aligned}
+\]
+
+For $d=100$ and $\delta=10^{-5}$,
+
+\[
+\frac{E_{\mathrm{Lap}}}{E_{\mathrm{Gauss}}}
+=\frac{100}{\ln(125000)}
+\approx 8.52.
+\]
+
+By choosing Gaussian over Laplace, the
+hospital accepts a small nonzero $\delta$
+(approximate DP instead of pure DP) in
+exchange for substantially lower noise
+and better utility.
 
 \end{answer}
 
@@ -940,6 +1142,96 @@ fix has bounded sensitivity, and describe the price paid in utility. Is the
 clipped-then-noised mean an unbiased estimate of $\bar{x}$?
 
 \begin{answer}
+
+The proposed mechanism is not necessarily
+$(\eps,\delta)$-DP because $C$ depends on
+the private dataset, so the noise scale
+also changes with the data.
+
+For example, consider adjacent datasets
+
+\[
+D=(0,\ldots,0),\qquad
+D'=(v,0,\ldots,0),
+\quad \|v\|_2>0.
+\]
+
+For $D$, we have $C(D)=0$, so the mechanism
+outputs $0$ with probability $1$.
+For $D'$, we have $C(D')=\|v\|_2>0$,
+so the output has a continuous Gaussian
+distribution.
+
+Taking $S=\{0\}$,
+
+\[
+\Pr(\cA(D)\in S)=1,
+\qquad
+\Pr(\cA(D')\in S)=0.
+\]
+
+This violates the DP inequality for
+any $\delta<1$.
+
+The standard fix is to choose a fixed,
+data-independent clipping threshold $C>0$
+and replace each feature vector by
+
+\[
+\tilde{x}_i
+=x_i\min\left(1,\frac{C}{\|x_i\|_2}\right),
+\]
+
+with $\tilde{x}_i=0$ when $x_i=0$.
+
+Since $\|\tilde{x}_i\|_2\le C$, under
+replacement adjacency,
+
+\[
+\begin{aligned}
+\|\tilde{\bar{x}}(D)
+-\tilde{\bar{x}}(D')\|_2
+&=\frac{1}{n}\|\tilde{x}_i-\tilde{x}_i'\|_2\\
+&\le\frac{1}{n}
+(\|\tilde{x}_i\|_2+\|\tilde{x}_i'\|_2)\\
+&\le\frac{2C}{n}.
+\end{aligned}
+\]
+
+Thus, the clipped mean has bounded
+$\ell_2$ sensitivity,
+
+\[
+\Delta_2\tilde{\bar{x}}=\frac{2C}{n},
+\]
+
+which is tight for opposite vectors
+of norm $C$.
+
+We can then apply the Gaussian mechanism
+with a fixed noise scale calibrated to
+this sensitivity.
+
+The cost is clipping bias: vectors with
+norm greater than $C$ are modified,
+so the released mean may differ from
+the original mean. A smaller $C$ reduces
+the required noise but generally increases
+clipping bias.
+
+Since the Gaussian noise has zero mean,
+
+\[
+\mathbb{E}_Z[\tilde{\bar{x}}+Z]
+=\tilde{\bar{x}}
+\neq\bar{x}
+\]
+
+in general.
+
+Therefore, the clipped-then-noised mean
+is unbiased for the clipped mean, but
+not necessarily for the original mean.
 
 \end{answer}
 
@@ -955,6 +1247,64 @@ lectures that improve on simple composition; you need not explain how they
 work).
 
 \begin{answer}
+
+By simple composition, the total privacy
+budget is the sum of the per-day budgets.
+For $T=100$ releases,
+
+\[
+\eps_t=\frac{0.5}{100}=0.005.
+\]
+
+To maintain the overall guarantee
+$(0.5,10^{-5})$-DP, we also set
+
+\[
+\delta_t=\frac{10^{-5}}{100}=10^{-7}.
+\]
+
+Using $\Delta_2\bar{x}=0.002$, the
+per-day Gaussian noise scale is
+
+\[
+\begin{aligned}
+\sigma_t
+&=\frac{\Delta_2\bar{x}}{\eps_t}
+\sqrt{2\ln(1.25/\delta_t)}\\
+&=\frac{0.002}{0.005}
+\sqrt{2\ln(1.25/10^{-7})}\\
+&\approx 2.2867.
+\end{aligned}
+\]
+
+Compared with $\sigma\approx0.01938$
+in part (b), this is about $118$ times
+larger.
+
+The RMS error of each release is
+
+\[
+\mathrm{RMSE}
+=\sqrt{d}\,\sigma_t
+=\sqrt{100}(2.2867)
+\approx22.87.
+\]
+
+If $\delta_t$ were kept at $10^{-5}$,
+the noise would instead increase by
+exactly $100$ times, giving an RMS
+error of about $19.38$, but the total
+privacy guarantee would become
+$(0.5,10^{-3})$-DP.
+
+Simple composition makes iterative
+algorithms such as DP-SGD appear impractical
+because the required noise grows rapidly
+with the number of iterations. However,
+advanced composition, Renyi DP (RDP),
+moments accountants, and privacy
+amplification by subsampling provide
+tighter privacy accounting.
 
 \end{answer}
 
@@ -986,6 +1336,67 @@ $k_u>m$?
 
 \begin{answer}
 
+Under record-level add/remove adjacency,
+two adjacent datasets differ by exactly
+one post. Therefore,
+
+\[
+|f(D)-f(D')|=1,
+\]
+
+so
+
+\[
+\boxed{\Delta_1 f=1}.
+\]
+
+Under user-level add/remove adjacency,
+two adjacent datasets differ by one user
+and all of their posts. Thus,
+
+\[
+|f(D)-f(D')|=k_u.
+\]
+
+Since there is no upper bound on $k_u$,
+the sensitivity is unbounded:
+
+\[
+\boxed{\Delta_1 f=\infty}.
+\]
+
+Now consider the contribution-bounded query
+
+\[
+f_m(D)=\sum_u\min(k_u,m).
+\]
+
+Adding or removing one user changes
+the query by at most $m$, since
+
+\[
+|f_m(D)-f_m(D')|
+=\min(k_u,m)\le m.
+\]
+
+This bound is tight when $k_u\ge m$.
+Therefore,
+
+\[
+\boxed{\Delta_1 f_m=m}.
+\]
+
+When many users have $k_u>m$, the query
+measures the total number of posts counted
+up to $m$ per user, rather than the actual
+total number of posts. It underestimates
+the true total by
+
+\[
+f(D)-f_m(D)
+=\sum_u\max(k_u-m,0).
+\]
+
 \end{answer}
 
 \item (6 pts) \textbf{Two routes to user-level pure DP.} The analyst wants
@@ -1005,6 +1416,67 @@ Route B promise to the same user?
 
 \begin{answer}
 
+For Route A, group privacy implies that
+a user contributing $k$ posts receives
+a pure DP guarantee of $k\eps_0$.
+
+For a user with exactly $50$ posts,
+we require
+
+\[
+50\eps_0=5
+\quad\Rightarrow\quad
+\eps_0=0.1.
+\]
+
+Since $\Delta_1 f=1$, the Laplace scale is
+
+\[
+b_A=\frac{\Delta_1 f}{\eps_0}
+=\frac{1}{0.1}=10.
+\]
+
+For Route B, the contribution-bounded
+query has user-level sensitivity
+
+\[
+\Delta_1 f_{50}=50.
+\]
+
+Thus, its Laplace scale is
+
+\[
+b_B=\frac{\Delta_1 f_{50}}{\eps_{\user}}
+=\frac{50}{5}=10.
+\]
+
+Therefore, both routes use the same
+Laplace scale.
+
+However, for a user with $200$ posts,
+Route A only guarantees
+
+\[
+\eps_{\user}=200\eps_0
+=200(0.1)=20.
+\]
+
+In contrast, Route B limits every user's
+contribution to at most $50$ posts, so
+the user-level sensitivity remains $50$
+regardless of the actual number of posts.
+
+Hence, Route B still guarantees
+$\eps_{\user}=5$ for a user with $200$
+posts.
+
+Therefore, Route B provides a uniform
+user-level privacy guarantee, while
+Route A's guarantee becomes weaker for
+users with more posts. The trade-off is
+that Route B releases a capped total
+rather than the true total number of posts.
+
 \end{answer}
 
 \item (6 pts) \textbf{The two routes under approximate DP.} Now the analyst
@@ -1012,56 +1484,226 @@ uses the Gaussian mechanism instead, with a record-level
 $(\eps_0,\delta_0)=(0.1,10^{-8})$ in Route A, and user-level
 $(\eps,\delta)=(5,10^{-8})$ on $f_{50}$ in Route B.
 \begin{enumerate}
-  \item Using the group-privacy theorem for approximate DP from the lecture,
-  compute the user-level $(\eps_{\user},\delta_{\user})$ that Route A gives to
-  a user with 50 posts.
+\item Using the group-privacy theorem for approximate DP from the lecture,
+compute the user-level $(\eps_{\user},\delta_{\user})$ that Route A gives to
+a user with 50 posts.
 
-  \begin{answer}
+\begin{answer}
 
-  \end{answer}
+By the group-privacy theorem for approximate
+DP, a group of size $k$ has privacy parameters
 
-  \item Calibrate both routes with the noise formula
-  $\sigma=\frac{\Delta_2 f}{\eps}\sqrt{2\ln(1.25/\delta)}$ at
-  $\delta=10^{-8}$ (Route A: $\Delta_2 f=1$, $\eps=\eps_0$; Route B:
-  $\Delta_2 f_{50}=50$, $\eps=5$). Show that the two values of $\sigma$
-  coincide, so that for a user with exactly 50 posts the two routes release
-  the same random variable. Route B certifies this mechanism as user-level
-  $(5,10^{-8})$-DP for that user (the classical theorem does not apply at
-  $\eps=5$, but you may take for granted, or verify numerically, that this
-  $\sigma$ satisfies the analytic Gaussian mechanism condition at
-  $(5,10^{-8})$). Explain why Route A's generic group-privacy conversion in
-  (i) certifies a much worse $\delta$ for the very same mechanism, and state
-  the lesson. Finally compare the $\delta_{\user}$ of (i) with the rule of
-  thumb $\delta\le1/N$ from the lecture.
+\[
+\eps_{\mathrm{user}}=k\eps_0,
+\qquad
+\delta_{\mathrm{user}}
+=\delta_0\sum_{i=0}^{k-1}e^{i\eps_0}.
+\]
 
-  \begin{answer}
+For a user with $k=50$ posts,
 
-  \end{answer}
+\[
+\eps_{\mathrm{user}}=50(0.1)=5,
+\]
+
+and
+
+\[
+\begin{aligned}
+\delta_{\mathrm{user}}
+&=10^{-8}\sum_{i=0}^{49}e^{0.1i}\\
+&=10^{-8}\frac{e^5-1}{e^{0.1}-1}\\
+&\approx 1.402\times10^{-5}.
+\end{aligned}
+\]
+
+Therefore, Route A provides the guarantee
+
+\[
+\boxed{(5,\ 1.402\times10^{-5})\text{-DP}}
+\]
+
+for a user with exactly $50$ posts.
+
+\end{answer}
+
+\item Calibrate both routes with the noise formula
+$\sigma=\frac{\Delta_2 f}{\eps}\sqrt{2\ln(1.25/\delta)}$ at
+$\delta=10^{-8}$ (Route A: $\Delta_2 f=1$, $\eps=\eps_0$; Route B:
+$\Delta_2 f_{50}=50$, $\eps=5$). Show that the two values of $\sigma$
+coincide, so that for a user with exactly 50 posts the two routes release
+the same random variable. Route B certifies this mechanism as user-level
+$(5,10^{-8})$-DP for that user (the classical theorem does not apply at
+$\eps=5$, but you may take for granted, or verify numerically, that this
+$\sigma$ satisfies the analytic Gaussian mechanism condition at
+$(5,10^{-8})$). Explain why Route A's generic group-privacy conversion in
+(i) certifies a much worse $\delta$ for the very same mechanism, and state
+the lesson. Finally compare the $\delta_{\user}$ of (i) with the rule of
+thumb $\delta\le1/N$ from the lecture.
+
+\begin{answer}
+
+For Route A, using $\Delta_2 f=1$,
+$\eps_0=0.1$, and $\delta_0=10^{-8}$,
+
+\[
+\begin{aligned}
+\sigma_A
+&=\frac{1}{0.1}
+\sqrt{2\ln(1.25/10^{-8})}\\
+&\approx61.064.
+\end{aligned}
+\]
+
+For Route B, using $\Delta_2 f_{50}=50$,
+$\eps=5$, and $\delta=10^{-8}$,
+
+\[
+\begin{aligned}
+\sigma_B
+&=\frac{50}{5}
+\sqrt{2\ln(1.25/10^{-8})}\\
+&\approx61.064.
+\end{aligned}
+\]
+
+Thus, $\sigma_A=\sigma_B$. For a user
+with exactly $50$ posts, both mechanisms
+have the same noise distribution and
+the same change in the query when that
+user is added or removed.
+
+However, Route A's generic group-privacy
+conversion gives
+$\delta_{\mathrm{user}}\approx1.402\times10^{-5}$,
+while Route B directly guarantees
+$(5,10^{-8})$-DP.
+
+This difference occurs because group privacy
+is a general bound that does not exploit the
+specific Gaussian noise distribution.
+Directly analyzing the user-level sensitivity
+can provide a much tighter guarantee.
+
+Finally, since $N=10^6$, the rule of thumb is
+
+\[
+\delta\le\frac1N=10^{-6}.
+\]
+
+Route A's converted value is about $14$
+times larger than this threshold, whereas
+Route B's $\delta=10^{-8}$ satisfies it.
+
+Thus, the lesson is that a generic group-privacy
+conversion can be much looser than a direct
+privacy analysis of the mechanism.
+
+\end{answer}
 \end{enumerate}
 
 \item (5 pts) \textbf{A time series.} The analyst now wants to release the
 vector $h\in\Z_{\ge0}^{365}$ of daily post counts, one coordinate per day of
 the year, with pure $\eps$-DP.
 \begin{enumerate}
-  \item Under record-level adjacency, compute $\Delta_1 h$ and state the
-  Laplace noise needed per coordinate. Compare with the naive plan ``treat the
-  365 daily counts as 365 separate queries and split $\eps$ by simple
-  composition'': by what factor is the naive noise larger, and why is the
-  split unnecessary?
+\item Under record-level adjacency, compute $\Delta_1 h$ and state the
+Laplace noise needed per coordinate. Compare with the naive plan ``treat the
+365 daily counts as 365 separate queries and split $\eps$ by simple
+composition'': by what factor is the naive noise larger, and why is the
+split unnecessary?
 
-  \begin{answer}
+\begin{answer}
 
-  \end{answer}
+Under record-level adjacency, adding or removing
+one post changes exactly one coordinate of $h$
+by $1$. Therefore,
 
-  \item Under user-level adjacency, compute $\Delta_1 h$ for two ways of
-  bounding contributions: (1) cap each user at $m$ posts in total for the
-  year; (2) cap each user at $c$ posts per day. Which cap would you choose if
-  most users write at most 3 posts per day but a few write 100, and why?
-  Comment on what happens to the data of the heavy users under your choice.
+\[
+\boxed{\Delta_1 h=1}.
+\]
 
-  \begin{answer}
+The vector Laplace mechanism adds independent
+noise to each coordinate:
 
-  \end{answer}
+\[
+Z_j\sim\operatorname{Lap}(0,1/\eps).
+\]
+
+Under naive simple composition, the privacy
+budget is divided among $365$ queries:
+
+\[
+\eps_j=\frac{\eps}{365}.
+\]
+
+Thus, the noise scale for each query becomes
+
+\[
+b_{\mathrm{naive}}=\frac{365}{\eps},
+\]
+
+which is $365$ times larger than the
+vector Laplace mechanism.
+
+This split is unnecessary because each post
+contributes to only one daily count.
+Hence, the entire vector has $\ell_1$
+sensitivity $1$ and can be released with
+the full privacy budget $\eps$.
+
+\end{answer}
+
+\item Under user-level adjacency, compute $\Delta_1 h$ for two ways of
+bounding contributions: (1) cap each user at $m$ posts in total for the
+year; (2) cap each user at $c$ posts per day. Which cap would you choose if
+most users write at most 3 posts per day but a few write 100, and why?
+Comment on what happens to the data of the heavy users under your choice.
+
+\begin{answer}
+
+Under user-level adjacency, adding or removing
+one user changes the daily counts by that
+user's contributions.
+
+If each user is capped at $m$ posts
+over the entire year, then
+
+\[
+\boxed{\Delta_1 h=m}.
+\]
+
+If each user is capped at $c$ posts per day,
+then their total contribution over $365$
+days is at most $365c$. Therefore,
+
+\[
+\boxed{\Delta_1 h=365c}.
+\]
+
+Since most users write at most $3$ posts
+per day, I would choose the per-day cap
+$c=3$ to preserve the daily posting patterns
+of typical users.
+
+Under this choice,
+
+\[
+\Delta_1 h=365(3)=1095.
+\]
+
+For heavy users who write $100$ posts
+in one day, only $3$ posts are counted,
+and the remaining $97$ are discarded
+from that day's statistic.
+
+However, this cap still gives a large
+sensitivity and requires substantial
+DP noise. An annual cap $m$ could provide
+lower sensitivity if chosen according to
+typical yearly activity, but it may
+distort the daily posting patterns more.
+
+\end{answer}
 \end{enumerate}
 
 \item (3 pts) \textbf{Writing the privacy statement.} The analyst's report
@@ -1072,6 +1714,28 @@ user-level adjacency are not comparable promises, using your answer to
 part (b).
 
 \begin{answer}
+
+The statement is incomplete because it does
+not specify the adjacency relation (record-level
+or user-level), the value of $\delta$ (or whether
+the guarantee is pure DP), any contribution
+bounds, or whether $\eps=1$ applies to each
+release or to all releases combined.
+
+Under record-level adjacency, $\eps=1$
+protects the addition or removal of a single
+post. A user with $k$ posts only receives
+a group-privacy guarantee of $k\eps=k$.
+
+In contrast, under user-level adjacency,
+$\eps=1$ protects the addition or removal
+of an entire user and all their posts,
+subject to the stated contribution bounds.
+
+Therefore, the two guarantees protect
+different units of information and are
+not directly comparable, even though
+they have the same $\eps$.
 
 \end{answer}
 
